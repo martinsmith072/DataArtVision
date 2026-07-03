@@ -128,6 +128,7 @@
   .pos { width: 36px; text-align: center; font-family: var(--display); font-size: 1.7rem; color: #c9ccd4; flex-shrink: 0; line-height: 1; }
   .track.top1 .pos { color: var(--pink); }
   .track.top2 .pos, .track.top3 .pos { color: #c9ccd4; }
+  .pos small { display: block; font-family: var(--font); font-size: 0.5rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); line-height: 1; margin-top: 3px; }
   .cover { width: 56px; height: 56px; border-radius: 10px; flex-shrink: 0; object-fit: cover; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.15rem; color: rgba(255,255,255,0.95); }
   .track-meta { flex: 1; min-width: 0; }
   .track-meta .title { font-weight: 600; font-size: 1.02rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -141,10 +142,10 @@
   .mini-btn.rank-btn { background: var(--pink); border-color: var(--pink); color: #0b0b0f; }
   .mini-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .yours { font-size: 0.72rem; color: var(--text-dim); border: 1px solid var(--border); border-radius: 999px; padding: 5px 10px; letter-spacing: 0.05em; text-transform: uppercase; }
-  .points { font-family: var(--display); font-size: 1.4rem; color: #0b0b0f; background: rgba(255,255,255,0.1); flex-shrink: 0; text-align: center; min-width: 58px; padding: 6px 12px; border-radius: 9px; line-height: 1; }
-  .track .points { color: #fff; background: rgba(255,255,255,0.1); }
+  .points { font-family: var(--display); font-size: 2.2rem; color: #fff; background: rgba(255,255,255,0.12); flex-shrink: 0; text-align: center; min-width: 70px; padding: 8px 14px; border-radius: 11px; line-height: 1; }
+  .track .points { color: #fff; }
   .track.top1 .points { color: #0b0b0f; background: linear-gradient(90deg, var(--cyan), var(--pink)); }
-  .points small { display: block; font-family: var(--font); font-weight: 500; font-size: 0.62rem; opacity: 0.75; margin-top: 2px; }
+  .points small { display: block; font-family: var(--font); font-weight: 700; font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; margin-top: 3px; }
 
   /* ===== BALLOT STRIP ===== */
   .ballot { background: linear-gradient(90deg, rgba(255,47,176,0.08), rgba(125,231,224,0.05)); border: 1px dashed rgba(255,47,176,0.5); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; }
@@ -404,7 +405,7 @@ function renderHome() {
   } else if (votingMode) {
     top = whoamiHtml("home") + ballotHtml(eligible);
   } else if (votingOpen && !state.me) {
-    top = `<div class="banner info">🗳️ Voting is open — listen below, then type your name to build your ballot. Points stay hidden until you've voted. Your name is stored to stop double voting but <b>never shown against your vote</b>.</div>` + whoamiHtml("home");
+    top = `<div class="banner info">🗳️ Voting is open! Have a listen, type your name, then tap <b>Vote</b> on your favourite tracks in order. Points stay hidden until you've voted. Your name is only used to stop double voting — it's <b>never shown against your vote</b>.</div>` + whoamiHtml("home");
   } else if (votingOpen) {
     top = whoamiHtml("home") + `<div class="banner warn">Not enough tracks to vote on yet.</div>`;
   } else if (state.settings.submissions_open) {
@@ -423,6 +424,13 @@ function renderHome() {
   let rows = state.tracks.map(t => ({ ...t, points: totals.get(t.id) || 0 }));
   if (pointsVisible) {
     rows.sort((a, b) => b.points - a.points || (b.plays || 0) - (a.plays || 0) || a.title.localeCompare(b.title));
+    // Joint placement: equal points share the same rank (1, 1, 3, …) — a tie is joint first.
+    rows.forEach((r, idx) => {
+      r.rank = (idx > 0 && r.points === rows[idx - 1].points) ? rows[idx - 1].rank : idx + 1;
+    });
+    const rankCounts = {};
+    rows.forEach(r => { rankCounts[r.rank] = (rankCounts[r.rank] || 0) + 1; });
+    rows.forEach(r => { r.tied = rankCounts[r.rank] > 1; });
   } // else: entry order — neutral while people are still voting
 
   el.innerHTML = top + rows.map((t, i) => trackRowHtml(t, i, { pointsVisible, votingMode })).join("");
@@ -439,16 +447,17 @@ function ballotHtml(eligible) {
     </div>`;
   }).join("");
   if (state.ranking.length < need) {
-    chips += `<div class="slot-empty">Next pick gets <b>${POINTS[state.ranking.length]} points</b> — ${need - state.ranking.length} to go</div>`;
+    chips += `<div class="slot-empty">Your next pick earns <b>${POINTS[state.ranking.length]} points</b> — ${need - state.ranking.length} more to choose</div>`;
   }
   const hasOwn = state.tracks.some(t => norm(t.real_name) === norm(state.me));
   const ready = state.ranking.length === need;
   return `
     <div class="ballot">
-      <h3>Your ballot — rank ${need === eligible.length ? "all " + need + " tracks" : "your top " + need}, best first${hasOwn ? " (yours isn't rankable)" : ""}. Tap a pick to remove it. Points reveal once you've voted.</h3>
+      <h3>Vote for your favourites — best first 🎶</h3>
+      <p class="note" style="margin-top:0;margin-bottom:12px">Tap <b>Vote</b> on the tracks you like, in order. Your 1st choice earns the most points (${POINTS[0]}), then ${POINTS[1]}, ${POINTS[2]}, and so on down the list. ${need === eligible.length ? "Choose all " + need + " tracks." : "Choose your top " + need + "."}${hasOwn ? " You can't vote for your own track." : ""} Tap a pick again to remove it. Scores stay hidden until you've voted.</p>
       ${chips}
       <button class="btn gold" style="margin-top:8px" ${ready ? "" : "disabled"} onclick="castBallot()">
-        ${ready ? "Cast ballot — final answer" : "Rank " + (need - state.ranking.length) + " more to cast"}
+        ${ready ? "Submit my votes ✓" : "Choose " + (need - state.ranking.length) + " more to finish"}
       </button>
       <div id="v-msg"></div>
     </div>`;
@@ -457,14 +466,17 @@ function ballotHtml(eligible) {
 function trackRowHtml(t, i, { pointsVisible, votingMode }) {
   const ranked = state.ranking.includes(t.id);
   const isMine = state.me && norm(t.real_name) === norm(state.me);
-  const posHtml = pointsVisible ? `<div class="pos">${i === 0 ? "🏆" : i + 1}</div>` : "";
-  const topClass = pointsVisible && i < 3 ? "top" + (i + 1) : "";
+  const rank = t.rank || (i + 1);
+  const posHtml = pointsVisible
+    ? `<div class="pos">${rank === 1 ? "🏆" : rank}${t.tied ? "<small>joint</small>" : ""}</div>`
+    : "";
+  const topClass = pointsVisible && rank <= 3 ? "top" + rank : "";
 
   let action = "";
   if (votingMode) {
     action = isMine
       ? `<span class="yours">Yours</span>`
-      : `<button class="mini-btn rank-btn" ${ranked ? "disabled" : ""} onclick="rank('${t.id}')">${ranked ? "Ranked ✓" : "Rank"}</button>`;
+      : `<button class="mini-btn rank-btn" ${ranked ? "disabled" : ""} onclick="rank('${t.id}')">${ranked ? "Voted ✓" : "Vote"}</button>`;
   }
   const pointsHtml = pointsVisible ? `<div class="points">${t.points}<small>pts</small></div>` : "";
 
