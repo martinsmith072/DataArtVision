@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git --version)",
+      "Bash(gh --version)",
+      "Bash(gh auth *)",
+      "Bash(brew --version)",
+      "Bash(git config *)",
+      "Bash(echo \"user.name:  $\\(git config --global user.name || echo '\\(not set\\)'\\)\")",
+      "Bash(echo \"user.email: $\\(git config --global user.email || echo '\\(not set\\)'\\)\")",
+      "Bash(git init *)",
+      "Bash(printf '.DS_Store\\\\n')",
+      "Bash(git add *)",
+      "Bash(git commit -q -m 'Initial commit: HTML app *)"
+    ]
+  }
+}

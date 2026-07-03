@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Contest</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  /* ============================================================
+     THEME — restyle freely; all colours/spacing live here
+     ============================================================ */
+  :root {
+    --bg: #12121a;
+    --surface: #1c1c28;
+    --surface-2: #262636;
+    --border: #34344a;
+    --text: #eef0f6;
+    --text-dim: #9a9db4;
+    --accent: #f2c14e;        /* points / highlights */
+    --accent-2: #6c8cff;      /* actions */
+    --danger: #ff6b7a;
+    --ok: #4fd6a5;
+    --radius: 12px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 20px 16px 80px; }
+
+  header { text-align: center; padding: 24px 0 16px; }
+  header h1 { font-size: 1.7rem; letter-spacing: 0.5px; }
+  header h1 span { color: var(--accent); }
+  header p { color: var(--text-dim); font-size: 0.9rem; margin-top: 6px; }
+
+  /* Tabs (just two views: chart home + enter) */
+  .tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+  .tabs button { flex: 1; padding: 11px 4px; border-radius: var(--radius); border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-dim); font-size: 0.95rem; cursor: pointer; }
+  .tabs button.active { background: var(--accent-2); border-color: var(--accent-2); color: #fff; font-weight: 600; }
+
+  /* Cards & forms */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px; margin-bottom: 14px; }
+  .card h2 { font-size: 1.1rem; margin-bottom: 12px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 0.85rem; color: var(--text-dim); margin-bottom: 6px; }
+  input[type="text"] { width: 100%; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 1rem; }
+  input[type="file"] { width: 100%; color: var(--text-dim); font-size: 0.9rem; }
+  .btn { display: inline-block; width: 100%; padding: 13px; border-radius: var(--radius); border: none;
+    background: var(--accent-2); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn.gold { background: var(--accent); color: #201a05; }
+  .note { font-size: 0.85rem; color: var(--text-dim); margin-top: 10px; line-height: 1.4; }
+  .banner { border-radius: var(--radius); padding: 14px 16px; margin-bottom: 14px; font-size: 0.95rem; line-height: 1.45; }
+  .banner.info { background: rgba(108,140,255,0.12); border: 1px solid rgba(108,140,255,0.4); }
+  .banner.ok { background: rgba(79,214,165,0.1); border: 1px solid rgba(79,214,165,0.4); }
+  .banner.warn { background: rgba(242,193,78,0.1); border: 1px solid rgba(242,193,78,0.4); }
+  .banner.err { background: rgba(255,107,122,0.1); border: 1px solid rgba(255,107,122,0.45); }
+  .hidden { display: none !important; }
+
+  /* Identity (type your name) */
+  .whoami { display: flex; gap: 8px; align-items: center; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; }
+  .whoami label { color: var(--text-dim); font-size: 0.85rem; white-space: nowrap; }
+  .whoami input { flex: 1; background: var(--surface); }
+  .whoami .mini-btn { flex-shrink: 0; }
+  .whoami .known { flex: 1; font-weight: 600; }
+  .whoami .change { color: var(--accent-2); font-size: 0.82rem; cursor: pointer; background: none;
+    border: none; text-decoration: underline; flex-shrink: 0; }
+
+  /* Track rows (home chart) */
+  .track { display: flex; gap: 12px; align-items: center; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; margin-bottom: 10px; }
+  .track.top1 { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .pos { width: 30px; text-align: center; font-weight: 700; font-size: 1rem; color: var(--text-dim); flex-shrink: 0; }
+  .track.top1 .pos, .track.top2 .pos, .track.top3 .pos { color: var(--accent); }
+  .cover { width: 56px; height: 56px; border-radius: 8px; flex-shrink: 0; object-fit: cover;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.15rem; color: rgba(255,255,255,0.9); }
+  .track-meta { flex: 1; min-width: 0; }
+  .track-meta .title { font-weight: 600; font-size: 0.98rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track-meta .artist { color: var(--text-dim); font-size: 0.83rem; margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track-meta .streams { color: var(--text-dim); font-size: 0.75rem; margin-top: 2px; }
+  .track-actions { display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
+  .mini-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font-size: 0.85rem; cursor: pointer; }
+  .mini-btn.play.playing { background: var(--ok); border-color: var(--ok); color: #06231a; }
+  .mini-btn.rank-btn { background: var(--accent-2); border-color: var(--accent-2); color: #fff; }
+  .mini-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .yours { font-size: 0.75rem; color: var(--text-dim); border: 1px solid var(--border);
+    border-radius: 6px; padding: 3px 7px; }
+  .points { font-weight: 700; font-size: 1.15rem; color: var(--accent); flex-shrink: 0; text-align: right; min-width: 44px; }
+  .points small { display: block; font-weight: 400; font-size: 0.7rem; color: var(--text-dim); }
+
+  /* Ballot strip (inline voting) */
+  .ballot { background: var(--surface-2); border: 1px dashed var(--accent); border-radius: var(--radius);
+    padding: 14px; margin-bottom: 16px; }
+  .ballot h3 { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 10px; }
+  .chip { display: flex; align-items: center; gap: 10px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; cursor: pointer; }
+  .chip .pts { background: var(--accent); color: #201a05; font-weight: 700; font-size: 0.85rem;
+    border-radius: 6px; padding: 3px 8px; min-width: 34px; text-align: center; }
+  .chip .chip-title { flex: 1; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip .x { color: var(--danger); font-weight: 700; }
+  .slot-empty { color: var(--text-dim); font-size: 0.85rem; padding: 6px 2px; }
+
+  footer { text-align: center; color: var(--text-dim); font-size: 0.78rem; margin-top: 30px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>🎵 Track <span>Contest</span></h1>
+    <p>AI-made music. Anonymous bands. Douze points.</p>
+  </header>
+
+  <div id="config-error" class="banner err hidden">
+    The app isn't connected to Supabase yet — open <b>index.html</b> and paste your project URL and anon key at the top of the script (see SETUP.md, step 4).
+  </div>
+
+  <div class="tabs">
+    <button id="tab-home" onclick="showTab('home')">Vote Now</button>
+    <button id="tab-submit" onclick="showTab('submit')">Submit a Track</button>
+  </div>
+
+  <div id="panel-home"></div>
+  <div id="panel-submit" class="hidden"></div>
+
+  <footer>One track and one ballot per person · votes are counted, never named</footer>
+</div>
+
+<audio id="player"></audio>
+
+<script>
+/* ============================================================
+   CONFIG — paste your values from Supabase → Settings → API
+   ============================================================ */
+const SUPABASE_URL = "PASTE_YOUR_PROJECT_URL_HERE";
+const SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_KEY_HERE";
+
+const POINTS = [12, 10, 8, 7, 6, 5, 4, 3, 2, 1];   // Eurovision
+const MAX_AUDIO_MB = 20;
+const MAX_IMAGE_MB = 5;
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let db = null;
+const state = {
+  me: localStorage.getItem("tc_name") || "",   // free-typed name; stored per browser
+  settings: { submissions_open: true, voting_open: false },
+  tracks: [],        // submissions (band_name shown; real_name only used privately)
+  ballots: [],       // [{ rankings: [id, ...] }] — voter names never fetched
+  myBallot: false,
+  ranking: [],       // submission ids, in my chosen order
+  tab: "home",
+  playingId: null,
+};
+
+const norm = s => String(s || "").trim().toLowerCase();
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+async function boot() {
+  if (SUPABASE_URL.startsWith("PASTE") || SUPABASE_ANON_KEY.startsWith("PASTE")) {
+    document.getElementById("config-error").classList.remove("hidden");
+    return;
+  }
+  db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  await refreshAll();
+  renderAll();
+}
+
+async function refreshAll() {
+  const [settingsRes, tracksRes, ballotsRes] = await Promise.all([
+    db.from("settings").select("*").eq("id", 1).maybeSingle(),
+    db.from("submissions").select("*").order("created_at"),
+    db.from("ballots").select("rankings"),          // rankings only — no names
+  ]);
+  if (settingsRes.data) state.settings = settingsRes.data;
+  state.ballots = ballotsRes.data || [];
+  state.tracks = (tracksRes.data || []).map(t => ({
+    ...t,
+    audioUrl: publicUrl(t.audio_path),
+    coverUrl: t.cover_path ? publicUrl(t.cover_path) : null,
+  }));
+  await checkMyBallot();
+}
+
+async function checkMyBallot() {
+  if (!state.me) { state.myBallot = false; return; }
+  const { data } = await db.from("ballots").select("id").ilike("voter_name", state.me.trim()).limit(1);
+  state.myBallot = !!(data && data.length);
+}
+
+function publicUrl(path) {
+  return db.storage.from("tracks").getPublicUrl(path).data.publicUrl;
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderAll() {
+  renderTabs();
+  renderHome();
+  renderSubmit();
+}
+
+function showTab(name) {
+  state.tab = name;
+  stopAudio();
+  renderAll();
+}
+
+function renderTabs() {
+  ["home", "submit"].forEach(t => {
+    document.getElementById("tab-" + t).classList.toggle("active", state.tab === t);
+    document.getElementById("panel-" + t).classList.toggle("hidden", state.tab !== t);
+  });
+}
+
+/* Identity: type once, browser remembers. Only shown where a name is needed. */
+function whoamiHtml(context) {
+  if (state.me) {
+    return `<div class="whoami">
+      <label>You're here as</label>
+      <span class="known">${esc(state.me)}</span>
+      <button class="change" onclick="clearMe()">not you?</button>
+    </div>`;
+  }
+  return `<div class="whoami">
+    <label for="me-${context}">Your name</label>
+    <input type="text" id="me-${context}" maxlength="60" placeholder="First name + surname"
+      onkeydown="if(event.key==='Enter')setMe(this.value)">
+    <button class="mini-btn" onclick="setMe(document.getElementById('me-${context}').value)">That's me</button>
+  </div>`;
+}
+
+async function setMe(name) {
+  name = String(name || "").trim();
+  if (!name) return;
+  state.me = name;
+  localStorage.setItem("tc_name", name);
+  state.ranking = [];
+  stopAudio();
+  await checkMyBallot();
+  renderAll();
+}
+
+function clearMe() {
+  state.me = "";
+  localStorage.removeItem("tc_name");
+  state.myBallot = false;
+  state.ranking = [];
+  renderAll();
+}
+
+/* ============================================================
+   HOME — tracks + chart + inline voting, all on one page
+   ============================================================ */
+function renderHome() {
+  const el = document.getElementById("panel-home");
+  const n = state.tracks.length;
+
+  if (!n) {
+    el.innerHTML = `<div class="banner info">No entries yet — hit <b>Submit a Track</b> and be the first on stage.</div>`;
+    return;
+  }
+
+  const votingOpen = state.settings.voting_open;
+  const revealAll = !votingOpen && state.ballots.length > 0;
+  const pointsVisible = state.myBallot || revealAll;
+  const eligible = state.me ? state.tracks.filter(t => norm(t.real_name) !== norm(state.me)) : state.tracks;
+  const votingMode = votingOpen && !!state.me && !state.myBallot && eligible.length >= 2;
+
+  /* --- status banner + identity --- */
+  let top = "";
+  if (revealAll) {
+    top = `<div class="banner ok">🏁 Final results — ${state.ballots.length} ballots counted. Time for the unmasking…</div>`;
+  } else if (votingOpen && state.myBallot) {
+    top = whoamiHtml("home") +
+      `<div class="banner ok">Your ballot is in — this is the live chart. ${state.ballots.length} ballot${state.ballots.length === 1 ? "" : "s"} so far; positions can still change!</div>`;
+  } else if (votingMode) {
+    top = whoamiHtml("home") + ballotHtml(eligible);
+  } else if (votingOpen && !state.me) {
+    top = `<div class="banner info">🗳️ Voting is open — listen below, then type your name to build your ballot. Points stay hidden until you've voted. Your name is stored to stop double voting but <b>never shown against your vote</b>.</div>` + whoamiHtml("home");
+  } else if (votingOpen) {
+    top = whoamiHtml("home") + `<div class="banner warn">Not enough tracks to vote on yet.</div>`;
+  } else if (state.settings.submissions_open) {
+    top = `<div class="banner info">Entries are open. Listen to what's in so far — then hit <b>Submit a Track</b> when yours is ready. Voting comes later.</div>`;
+  } else {
+    top = `<div class="banner info">The contest hasn't started voting yet — but the jukebox is open.</div>`;
+  }
+
+  /* --- points + ordering --- */
+  const totals = new Map(state.tracks.map(t => [t.id, 0]));
+  for (const b of state.ballots) {
+    (b.rankings || []).forEach((id, i) => {
+      if (totals.has(id) && i < POINTS.length) totals.set(id, totals.get(id) + POINTS[i]);
+    });
+  }
+  let rows = state.tracks.map(t => ({ ...t, points: totals.get(t.id) || 0 }));
+  if (pointsVisible) {
+    rows.sort((a, b) => b.points - a.points || (b.plays || 0) - (a.plays || 0) || a.title.localeCompare(b.title));
+  } // else: entry order — neutral while people are still voting
+
+  el.innerHTML = top + rows.map((t, i) => trackRowHtml(t, i, { pointsVisible, votingMode })).join("");
+}
+
+function ballotHtml(eligible) {
+  const need = Math.min(POINTS.length, eligible.length);
+  let chips = state.ranking.map((id, i) => {
+    const t = state.tracks.find(x => x.id === id);
+    return `<div class="chip" onclick="unrank('${id}')" title="Tap to remove">
+      <span class="pts">${POINTS[i]}</span>
+      <span class="chip-title">${esc(t ? t.title : "?")}</span>
+      <span class="x">✕</span>
+    </div>`;
+  }).join("");
+  if (state.ranking.length < need) {
+    chips += `<div class="slot-empty">Next pick gets <b>${POINTS[state.ranking.length]} points</b> — ${need - state.ranking.length} to go</div>`;
+  }
+  const hasOwn = state.tracks.some(t => norm(t.real_name) === norm(state.me));
+  const ready = state.ranking.length === need;
+  return `
+    <div class="ballot">
+      <h3>Your ballot — rank ${need === eligible.length ? "all " + need + " tracks" : "your top " + need}, best first${hasOwn ? " (yours isn't rankable)" : ""}. Tap a pick to remove it. Points reveal once you've voted.</h3>
+      ${chips}
+      <button class="btn gold" style="margin-top:8px" ${ready ? "" : "disabled"} onclick="castBallot()">
+        ${ready ? "Cast ballot — final answer" : "Rank " + (need - state.ranking.length) + " more to cast"}
+      </button>
+      <div id="v-msg"></div>
+    </div>`;
+}
+
+function trackRowHtml(t, i, { pointsVisible, votingMode }) {
+  const ranked = state.ranking.includes(t.id);
+  const isMine = state.me && norm(t.real_name) === norm(state.me);
+  const posHtml = pointsVisible ? `<div class="pos">${i === 0 ? "🏆" : i + 1}</div>` : "";
+  const topClass = pointsVisible && i < 3 ? "top" + (i + 1) : "";
+
+  let action = "";
+  if (votingMode) {
+    action = isMine
+      ? `<span class="yours">Yours</span>`
+      : `<button class="mini-btn rank-btn" ${ranked ? "disabled" : ""} onclick="rank('${t.id}')">${ranked ? "Ranked ✓" : "Rank"}</button>`;
+  }
+  const pointsHtml = pointsVisible ? `<div class="points">${t.points}<small>pts</small></div>` : "";
+
+  return `
+    <div class="track ${topClass}">
+      ${posHtml}
+      ${coverHtml(t)}
+      <div class="track-meta">
+        <div class="title">${esc(t.title)}</div>
+        <div class="artist">${esc(t.band_name)}</div>
+        <div class="streams">▶ ${t.plays || 0} stream${t.plays === 1 ? "" : "s"}</div>
+      </div>
+      <div class="track-actions">
+        <button class="mini-btn play ${state.playingId === t.id ? "playing" : ""}" onclick="togglePlay('${t.id}')">${state.playingId === t.id ? "⏸" : "▶"}</button>
+        ${action}
+      </div>
+      ${pointsHtml}
+    </div>`;
+}
+
+function rank(id) {
+  const eligible = state.tracks.filter(t => norm(t.real_name) !== norm(state.me));
+  const need = Math.min(POINTS.length, eligible.length);
+  if (state.ranking.includes(id) || state.ranking.length >= need) return;
+  state.ranking.push(id);
+  renderHome();
+}
+function unrank(id) {
+  state.ranking = state.ranking.filter(x => x !== id);
+  renderHome();
+}
+
+async function castBallot() {
+  const msg = document.getElementById("v-msg");
+  try {
+    const ins = await db.from("ballots").insert({ voter_name: state.me.trim(), rankings: state.ranking });
+    if (ins.error) {
+      if (ins.error.code === "23505") throw new Error("A ballot has already been cast under your name.");
+      throw ins.error;
+    }
+    stopAudio();
+    await refreshAll();
+    renderAll();          // same page re-renders with points revealed
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (e) {
+    if (msg) msg.innerHTML = `<div class="banner err">${esc(e.message || "Vote failed — try again.")}</div>`;
+  }
+}
+
+/* ============================================================
+   ENTER (submit) tab
+   ============================================================ */
+function renderSubmit() {
+  const el = document.getElementById("panel-submit");
+  const mine = state.me ? state.tracks.find(t => norm(t.real_name) === norm(state.me)) : null;
+
+  if (!state.settings.submissions_open) {
+    el.innerHTML = `<div class="banner warn">Entries are closed. ${state.tracks.length} track${state.tracks.length === 1 ? "" : "s"} made the contest.</div>`;
+    return;
+  }
+  if (!state.me) {
+    el.innerHTML = `<div class="banner info">Type your name to enter a track. Your real name is <b>never shown</b> — it just stops duplicate entries. Your band name is what the world sees.</div>` + whoamiHtml("submit");
+    return;
+  }
+  if (mine) {
+    el.innerHTML = whoamiHtml("submit") +
+      `<div class="banner ok">Your entry <b>${esc(mine.title)}</b> by <b>${esc(mine.band_name)}</b> is in. Your secret is safe. 🤫</div>`;
+    return;
+  }
+  el.innerHTML = whoamiHtml("submit") + `
+    <div class="card">
+      <h2>Submit your track</h2>
+      <div class="field">
+        <label for="f-band">Band / artist name (this is all anyone will see)</label>
+        <input type="text" id="f-band" maxlength="60" placeholder="e.g. The Prompt Engineers">
+      </div>
+      <div class="field">
+        <label for="f-title">Track title</label>
+        <input type="text" id="f-title" maxlength="80" placeholder="e.g. Midnight in Richmond">
+      </div>
+      <div class="field">
+        <label for="f-audio">MP3 file (max ${MAX_AUDIO_MB}MB)</label>
+        <input type="file" id="f-audio" accept=".mp3,audio/mpeg">
+      </div>
+      <div class="field">
+        <label for="f-cover">Cover art — optional (JPG/PNG, max ${MAX_IMAGE_MB}MB)</label>
+        <input type="file" id="f-cover" accept="image/*">
+      </div>
+      <button class="btn" id="f-go" onclick="submitTrack()">Submit entry</button>
+      <p class="note">One entry per person. Your real name (<b>${esc(state.me)}</b>) is stored privately and never displayed — the unmasking happens after the results. No edits after upload; ask the organiser to reset it if you need to swap.</p>
+      <div id="f-msg"></div>
+    </div>`;
+}
+
+async function submitTrack() {
+  const band = document.getElementById("f-band").value.trim();
+  const title = document.getElementById("f-title").value.trim();
+  const audio = document.getElementById("f-audio").files[0];
+  const cover = document.getElementById("f-cover").files[0];
+  const msg = document.getElementById("f-msg");
+  const btn = document.getElementById("f-go");
+  msg.innerHTML = "";
+
+  if (!band) return msg.innerHTML = `<div class="banner err">Give yourself a band name — that's half the fun.</div>`;
+  if (!title) return msg.innerHTML = `<div class="banner err">Give your track a title.</div>`;
+  if (!audio) return msg.innerHTML = `<div class="banner err">Choose your MP3 file.</div>`;
+  if (audio.size > MAX_AUDIO_MB * 1024 * 1024) return msg.innerHTML = `<div class="banner err">MP3 is over ${MAX_AUDIO_MB}MB — export a smaller version.</div>`;
+  if (cover && cover.size > MAX_IMAGE_MB * 1024 * 1024) return msg.innerHTML = `<div class="banner err">Cover image is over ${MAX_IMAGE_MB}MB.</div>`;
+
+  btn.disabled = true;
+  btn.textContent = "Uploading…";
+  try {
+    const id = crypto.randomUUID();
+    const audioPath = `${id}/audio.mp3`;
+    let coverPath = null;
+
+    let up = await db.storage.from("tracks").upload(audioPath, audio, { contentType: "audio/mpeg" });
+    if (up.error) throw up.error;
+
+    if (cover) {
+      const ext = (cover.name.split(".").pop() || "jpg").toLowerCase();
+      coverPath = `${id}/cover.${ext}`;
+      up = await db.storage.from("tracks").upload(coverPath, cover, { contentType: cover.type || "image/jpeg" });
+      if (up.error) coverPath = null; // track still counts without art
+    }
+
+    const ins = await db.from("submissions").insert({
+      id, real_name: state.me.trim(), band_name: band, title, audio_path: audioPath, cover_path: coverPath,
+    });
+    if (ins.error) {
+      if (ins.error.code === "23505") throw new Error("A track has already been entered under your name.");
+      throw ins.error;
+    }
+    await refreshAll();
+    state.tab = "home";
+    renderAll();
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = "Submit entry";
+    msg.innerHTML = `<div class="banner err">Upload failed: ${esc(e.message || "unknown error")}</div>`;
+  }
+}
+
+/* ============================================================
+   Shared bits
+   ============================================================ */
+function coverHtml(t) {
+  if (t.coverUrl) return `<img class="cover" src="${t.coverUrl}" alt="">`;
+  const seed = t.band_name || t.title;
+  const hue = [...seed].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
+  const initials = seed.split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase();
+  return `<div class="cover" style="background:linear-gradient(135deg,hsl(${hue},55%,42%),hsl(${(hue + 60) % 360},55%,30%))">${esc(initials)}</div>`;
+}
+
+const player = document.getElementById("player");
+player.onended = () => { state.playingId = null; renderAll(); };
+
+function togglePlay(id) {
+  const t = state.tracks.find(x => x.id === id);
+  if (!t) return;
+  if (state.playingId === id) {
+    player.pause();
+    state.playingId = null;
+  } else {
+    player.src = t.audioUrl;
+    player.play().catch(() => {});
+    state.playingId = id;
+    logPlay(id);
+  }
+  renderAll();
+}
+function stopAudio() { player.pause(); state.playingId = null; }
+
+/* Stream counter: one per track per browser, so replays don't inflate numbers */
+function logPlay(id) {
+  const key = "tc_played_" + id;
+  if (localStorage.getItem(key)) return;
+  localStorage.setItem(key, "1");
+  const t = state.tracks.find(x => x.id === id);
+  if (t) t.plays = (t.plays || 0) + 1;           // optimistic local bump
+  db.rpc("log_play", { track: id }).catch(() => {});
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+boot();
+</script>
+</body>
+</html>
