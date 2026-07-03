@@ -157,6 +157,58 @@
   .chip .x { color: var(--danger); font-weight: 700; }
   .slot-empty { color: var(--text-dim); font-size: 0.85rem; padding: 8px 2px; }
 
+  /* ===== POINTS TRAY (what you've given / what's left) ===== */
+  .ptray { display: flex; gap: 8px; margin: 4px 0 14px; flex-wrap: wrap; }
+  .ptoken { flex: 1 1 0; min-width: 64px; border-radius: 12px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.04); padding: 10px 6px 8px; text-align: center; position: relative; transition: all .18s ease; }
+  .ptoken .num { font-family: var(--display); font-size: 1.5rem; line-height: 1; color: var(--text-dim); }
+  .ptoken .who { font-size: 0.68rem; margin-top: 5px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ptoken.filled { background: linear-gradient(180deg, rgba(242,193,78,0.22), rgba(242,193,78,0.06)); border-color: var(--gold); }
+  .ptoken.filled .num { color: var(--gold); }
+  .ptoken.filled .who { color: #fff; font-weight: 600; }
+  @keyframes tokenglow { 0%,100% { box-shadow: 0 0 0 0 rgba(255,47,176,0); } 50% { box-shadow: 0 0 0 4px rgba(255,47,176,0.22); } }
+  .ptoken.next { border-color: var(--pink); border-style: dashed; animation: tokenglow 1.6s ease-in-out infinite; }
+  .ptoken.next .num { color: var(--pink); }
+  .ptoken.next .who { color: var(--pink); }
+
+  /* ===== NUMBERED VOTE BUTTONS ===== */
+  .votebtn { min-width: 66px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--border);
+    background: var(--surface-2); color: var(--text); font-family: var(--font); font-weight: 700; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; line-height: 1; gap: 3px; transition: all .15s ease; }
+  .votebtn .vn { font-family: var(--display); font-size: 1.35rem; }
+  .votebtn .vl { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.8; }
+  .votebtn.give { background: var(--pink); border-color: var(--pink); color: #0b0b0f; }
+  .votebtn.give:hover { filter: brightness(1.08); }
+  .votebtn.given { background: linear-gradient(180deg, var(--cyan), var(--pink)); border-color: transparent; color: #0b0b0f; }
+  .votebtn.given:hover { filter: brightness(1.05); }
+  .votebtn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ===== WINNER SPOTLIGHT (reveal) ===== */
+  .closed-pill { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px;
+    font-family: var(--display); font-size: 1.2rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--pink); }
+  .closed-pill::before, .closed-pill::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,47,176,0.5), transparent); }
+  @keyframes winglow { 0%,100% { box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,47,176,0.35), 0 0 60px rgba(255,47,176,0.25); } 50% { box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,47,176,0.6), 0 0 90px rgba(255,47,176,0.45); } }
+  .winner { position: relative; overflow: hidden; border-radius: 20px; padding: 30px 26px; margin-bottom: 20px;
+    background: radial-gradient(120% 130% at 50% 0%, #241546 0%, #12102a 55%, #0a0820 100%);
+    border: 1px solid rgba(255,47,176,0.4); animation: winglow 3s ease-in-out infinite; text-align: center; }
+  .winner .rays { position: absolute; inset: 0; pointer-events: none;
+    background: conic-gradient(from 0deg at 50% 34%, rgba(255,47,176,0.14), transparent 22%, rgba(125,231,224,0.12) 46%, transparent 68%, rgba(242,193,78,0.14) 88%, transparent);
+    animation: rayspin 22s linear infinite; }
+  @keyframes rayspin { to { transform: rotate(360deg); } }
+  .winner-crown { font-size: 2.1rem; position: relative; }
+  .winner-cover { width: 116px; height: 116px; border-radius: 16px; margin: 8px auto 14px; position: relative;
+    background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 2rem; color: #fff; box-shadow: 0 12px 34px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.85); }
+  .winner-label { position: relative; color: var(--gold); font-size: 0.78rem; letter-spacing: 0.34em; text-transform: uppercase; font-weight: 700; }
+  .winner-title { position: relative; font-family: var(--display); font-size: 2.3rem; line-height: 1.05; margin: 6px 0 2px; }
+  .winner-band { position: relative; color: var(--text-dim); font-size: 1rem; }
+  .winner-points { position: relative; display: inline-flex; align-items: baseline; gap: 6px; margin-top: 14px;
+    font-family: var(--display); font-size: 2rem; color: #0b0b0f; background: linear-gradient(90deg, var(--cyan), var(--pink));
+    padding: 6px 20px; border-radius: 999px; }
+  .winner-points small { font-family: var(--font); font-size: 0.7rem; font-weight: 600; opacity: 0.8; }
+  .confetti { position: absolute; top: -12px; width: 9px; height: 14px; opacity: 0.9; animation: fall linear infinite; }
+  @keyframes fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 0; } 12% { opacity: 1; } 100% { transform: translateY(320px) rotate(420deg); opacity: 0; } }
+
   footer { text-align: center; color: var(--text-dim); font-size: 0.78rem; margin-top: 34px; letter-spacing: 0.03em; }
 
   /* ===== EQUALISER BARS ===== */
@@ -395,26 +447,7 @@ function renderHome() {
   const eligible = state.me ? state.tracks.filter(t => norm(t.real_name) !== norm(state.me)) : state.tracks;
   const votingMode = votingOpen && !!state.me && !state.myBallot && eligible.length >= 2;
 
-  /* --- status banner + identity --- */
-  let top = "";
-  if (revealAll) {
-    top = `<div class="banner ok">🏁 Final results — ${state.ballots.length} ballots counted. Time for the unmasking…</div>`;
-  } else if (votingOpen && state.myBallot) {
-    top = whoamiHtml("home") +
-      `<div class="banner ok">Your ballot is in — this is the live chart. ${state.ballots.length} ballot${state.ballots.length === 1 ? "" : "s"} so far; positions can still change!</div>`;
-  } else if (votingMode) {
-    top = whoamiHtml("home") + ballotHtml(eligible);
-  } else if (votingOpen && !state.me) {
-    top = `<div class="banner info">🗳️ Voting is open! Have a listen, type your name, then tap <b>Vote</b> on your favourite tracks in order. Points stay hidden until you've voted. Your name is only used to stop double voting — it's <b>never shown against your vote</b>.</div>` + whoamiHtml("home");
-  } else if (votingOpen) {
-    top = whoamiHtml("home") + `<div class="banner warn">Not enough tracks to vote on yet.</div>`;
-  } else if (state.settings.submissions_open) {
-    top = `<div class="banner info">Entries are open. Listen to what's in so far — then hit <b>Submit a Track</b> when yours is ready. Voting comes later.</div>`;
-  } else {
-    top = `<div class="banner info">The contest hasn't started voting yet — but the jukebox is open.</div>`;
-  }
-
-  /* --- points + ordering --- */
+  /* --- points + ordering (computed first so the winner card can use it) --- */
   const totals = new Map(state.tracks.map(t => [t.id, 0]));
   for (const b of state.ballots) {
     (b.rankings || []).forEach((id, i) => {
@@ -433,31 +466,89 @@ function renderHome() {
     rows.forEach(r => { r.tied = rankCounts[r.rank] > 1; });
   } // else: entry order — neutral while people are still voting
 
+  /* --- status banner + identity --- */
+  let top = "";
+  if (revealAll) {
+    const firsts = rows.filter(r => r.rank === 1);
+    const winners = (rows[0] && rows[0].points > 0) ? firsts : [rows[0]];
+    const joint = winners.length > 1;
+    top = winners.map(w => winnerHtml(w, joint)).join("") +
+      `<div class="closed-pill">The full results</div>`;
+  } else if (votingOpen && state.myBallot) {
+    top = whoamiHtml("home") +
+      `<div class="banner ok">Your ballot is in — this is the live chart. ${state.ballots.length} ballot${state.ballots.length === 1 ? "" : "s"} so far; positions can still change!</div>`;
+  } else if (votingMode) {
+    top = whoamiHtml("home") + ballotHtml(eligible);
+  } else if (votingOpen && !state.me) {
+    top = `<div class="banner info">🗳️ Voting is open — listen below, then type your name to build your ballot. Points stay hidden until you've voted. Your name is stored to stop double voting but <b>never shown against your vote</b>.</div>` + whoamiHtml("home");
+  } else if (votingOpen) {
+    top = whoamiHtml("home") + `<div class="banner warn">Not enough tracks to vote on yet.</div>`;
+  } else if (state.settings.submissions_open) {
+    top = `<div class="banner info">Entries are open. Listen to what's in so far — then hit <b>Submit a Track</b> when yours is ready. Voting comes later.</div>`;
+  } else {
+    top = `<div class="banner info">The contest hasn't started voting yet — but the jukebox is open.</div>`;
+  }
+
   el.innerHTML = top + rows.map((t, i) => trackRowHtml(t, i, { pointsVisible, votingMode })).join("");
+}
+
+/* Winner spotlight shown when voting has closed */
+function winnerHtml(t, joint) {
+  if (!t) return "";
+  let cover;
+  if (t.coverUrl) {
+    cover = `<div class="winner-cover" style="background-image:url('${t.coverUrl}')"></div>`;
+  } else {
+    const seed = t.band_name || t.title;
+    const hue = [...seed].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
+    const initials = seed.split(/\s+/).slice(0, 2).map(w => w[0] || "").join("").toUpperCase();
+    cover = `<div class="winner-cover" style="background:linear-gradient(135deg,hsl(${hue},55%,45%),hsl(${(hue + 60) % 360},55%,32%))">${esc(initials)}</div>`;
+  }
+  const cols = ["#ff2fb0", "#7de7e0", "#f2c14e", "#7a6bff", "#ff2b46"];
+  let confetti = "";
+  for (let i = 0; i < 16; i++) {
+    confetti += `<span class="confetti" style="left:${(i * 6.3 + 3).toFixed(1)}%;background:${cols[i % cols.length]};animation-duration:${(2.6 + (i % 5) * 0.5).toFixed(1)}s;animation-delay:${(i * 0.22).toFixed(2)}s;transform:rotate(${i * 40}deg)"></span>`;
+  }
+  return `
+    <div class="closed-pill">🏁 Voting closed</div>
+    <div class="winner">
+      <div class="rays"></div>
+      ${confetti}
+      <div class="winner-crown">👑</div>
+      ${cover}
+      <div class="winner-label">${joint ? "Joint winner" : "Winner"} &middot; DataArtVision 2026</div>
+      <div class="winner-title">${esc(t.title)}</div>
+      <div class="winner-band">${esc(t.band_name)}</div>
+      <div class="winner-points">${t.points}<small>PTS</small></div>
+    </div>`;
 }
 
 function ballotHtml(eligible) {
   const need = Math.min(POINTS.length, eligible.length);
-  let chips = state.ranking.map((id, i) => {
-    const t = state.tracks.find(x => x.id === id);
-    return `<div class="chip" onclick="unrank('${id}')" title="Tap to remove">
-      <span class="pts">${POINTS[i]}</span>
-      <span class="chip-title">${esc(t ? t.title : "?")}</span>
-      <span class="x">✕</span>
-    </div>`;
-  }).join("");
-  if (state.ranking.length < need) {
-    chips += `<div class="slot-empty">Your next pick earns <b>${POINTS[state.ranking.length]} points</b> — ${need - state.ranking.length} more to choose</div>`;
-  }
   const hasOwn = state.tracks.some(t => norm(t.real_name) === norm(state.me));
   const ready = state.ranking.length === need;
+
+  // Points tray — one box per point value; filled shows the track, next glows
+  let tray = "";
+  for (let i = 0; i < need; i++) {
+    const id = state.ranking[i];
+    if (id) {
+      const t = state.tracks.find(x => x.id === id);
+      tray += `<div class="ptoken filled" onclick="unrank('${id}')" title="Tap to remove">
+        <div class="num">${POINTS[i]}</div><div class="who">${esc(t ? t.title : "?")}</div></div>`;
+    } else if (i === state.ranking.length) {
+      tray += `<div class="ptoken next"><div class="num">${POINTS[i]}</div><div class="who">give next</div></div>`;
+    } else {
+      tray += `<div class="ptoken"><div class="num">${POINTS[i]}</div><div class="who">&nbsp;</div></div>`;
+    }
+  }
+
   return `
     <div class="ballot">
-      <h3>Vote for your favourites — best first 🎶</h3>
-      <p class="note" style="margin-top:0;margin-bottom:12px">Tap <b>Vote</b> on the tracks you like, in order. Your 1st choice earns the most points (${POINTS[0]}), then ${POINTS[1]}, ${POINTS[2]}, and so on down the list. ${need === eligible.length ? "Choose all " + need + " tracks." : "Choose your top " + need + "."}${hasOwn ? " You can't vote for your own track." : ""} Tap a pick again to remove it. Scores stay hidden until you've voted.</p>
-      ${chips}
-      <button class="btn gold" style="margin-top:8px" ${ready ? "" : "disabled"} onclick="castBallot()">
-        ${ready ? "Submit my votes ✓" : "Choose " + (need - state.ranking.length) + " more to finish"}
+      <h3>Give your points — tap a track's <b>pink number</b> to award it. Your favourite gets 12, then 10, 8… down the list.${hasOwn ? " Your own track can't be picked." : ""}</h3>
+      <div class="ptray">${tray}</div>
+      <button class="btn gold" ${ready ? "" : "disabled"} onclick="castBallot()">
+        ${ready ? "Cast ballot — final answer" : "Give " + (need - state.ranking.length) + " more to cast"}
       </button>
       <div id="v-msg"></div>
     </div>`;
@@ -474,9 +565,20 @@ function trackRowHtml(t, i, { pointsVisible, votingMode }) {
 
   let action = "";
   if (votingMode) {
-    action = isMine
-      ? `<span class="yours">Yours</span>`
-      : `<button class="mini-btn rank-btn" ${ranked ? "disabled" : ""} onclick="rank('${t.id}')">${ranked ? "Voted ✓" : "Vote"}</button>`;
+    if (isMine) {
+      action = `<span class="yours">Yours</span>`;
+    } else if (ranked) {
+      const pts = POINTS[state.ranking.indexOf(t.id)];
+      action = `<button class="votebtn given" onclick="unrank('${t.id}')" title="Tap to remove"><span class="vn">${pts}</span><span class="vl">pts ✓</span></button>`;
+    } else {
+      const eligibleCount = state.tracks.filter(x => norm(x.real_name) !== norm(state.me)).length;
+      const need = Math.min(POINTS.length, eligibleCount);
+      const full = state.ranking.length >= need;
+      const next = POINTS[state.ranking.length];
+      action = full
+        ? `<button class="votebtn" disabled><span class="vn">–</span><span class="vl">full</span></button>`
+        : `<button class="votebtn give" onclick="rank('${t.id}')"><span class="vn">${next}</span><span class="vl">give pts</span></button>`;
+    }
   }
   const pointsHtml = pointsVisible ? `<div class="points">${t.points}<small>pts</small></div>` : "";
 
