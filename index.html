@@ -106,6 +106,17 @@
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn.gold { background: linear-gradient(90deg, var(--cyan), var(--pink)); color: #0b0b0f; }
   .note { font-size: 0.83rem; color: var(--text-dim); margin-top: 12px; line-height: 1.5; }
+
+  /* ===== YOUR ENTRIES (submit tab) ===== */
+  .myentries { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 14px; }
+  .myentries-head { font-size: 0.82rem; color: var(--text-dim); font-weight: 600; letter-spacing: 0.03em; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+  .myentries-head span { color: var(--gold); font-size: 0.72rem; letter-spacing: 0.06em; }
+  .myentry { display: flex; gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--border); }
+  .myentry:first-of-type { border-top: none; padding-top: 0; }
+  .myentry .cover { width: 42px; height: 42px; font-size: 0.9rem; }
+  .myentry-meta { min-width: 0; }
+  .myentry-meta .title { font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .myentry-meta .artist { color: var(--text-dim); font-size: 0.82rem; margin-top: 1px; }
   .banner { border-radius: var(--radius); padding: 15px 17px; margin-bottom: 14px; font-size: 0.94rem; line-height: 1.5; }
   .banner.info { background: rgba(125,231,224,0.08); border: 1px solid rgba(125,231,224,0.32); }
   .banner.ok { background: rgba(79,214,165,0.1); border: 1px solid rgba(79,214,165,0.4); }
@@ -252,6 +263,57 @@
   .nb-play:hover { filter: brightness(1.1); }
   .nb-close { width: 30px; height: 30px; border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text-dim); cursor: pointer; flex-shrink: 0; font-size: 0.9rem; }
   .nb-close:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+
+  /* ===== POINTS DISTRIBUTION BAR (leaderboard) ===== */
+  .pbar { position: relative; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.08); margin-top: 7px; overflow: hidden; }
+  .pbar i { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: linear-gradient(90deg, var(--cyan), var(--pink)); transition: width .5s cubic-bezier(0.2,0.85,0.25,1); }
+  .track.top1 .pbar i { background: linear-gradient(90deg, var(--pink), var(--gold)); }
+
+  /* ===== HOW-IT-WORKS TRIGGER (in hero) ===== */
+  .howto-btn { margin-top: 18px; display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px;
+    border-radius: 999px; border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.05);
+    color: var(--text); font-family: var(--font); font-size: 0.82rem; font-weight: 600; letter-spacing: 0.03em;
+    cursor: pointer; transition: all .15s ease; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .howto-btn:hover { border-color: var(--pink); color: #fff; background: rgba(255,47,176,0.12); }
+  .howto-btn .q { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px;
+    border-radius: 999px; background: var(--pink); color: #0b0b0f; font-size: 0.72rem; font-weight: 700; }
+
+  /* ===== INTRO OVERLAY ===== */
+  .intro-overlay { position: fixed; inset: 0; z-index: 200; display: flex; align-items: center; justify-content: center;
+    padding: 22px; background: rgba(5,5,7,0.72); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    opacity: 0; pointer-events: none; transition: opacity .32s ease; }
+  .intro-overlay.show { opacity: 1; pointer-events: auto; }
+  @keyframes introrise { from { transform: translateY(26px) scale(0.97); opacity: 0; } to { transform: none; opacity: 1; } }
+  .intro-card { position: relative; width: min(560px, 100%); max-height: calc(100vh - 44px); overflow-y: auto;
+    border-radius: 22px; padding: 40px 34px 30px; text-align: center;
+    background: radial-gradient(130% 120% at 50% -8%, #241546 0%, #12102a 52%, #0a0820 100%);
+    border: 1px solid rgba(255,47,176,0.42); box-shadow: 0 30px 90px rgba(0,0,0,0.62), 0 0 60px rgba(255,47,176,0.16); }
+  .intro-overlay.show .intro-card { animation: introrise .42s cubic-bezier(0.2,0.85,0.25,1) both; }
+  .intro-close { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; border-radius: 999px;
+    border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: var(--text-dim); font-size: 1rem;
+    cursor: pointer; transition: all .15s ease; }
+  .intro-close:hover { color: var(--text); border-color: rgba(255,255,255,0.28); }
+  .intro-heart { width: 62px; height: 58px; margin: 0 auto 4px; position: relative; animation: herobeat 2.8s ease-in-out infinite; transform-origin: center; }
+  .intro-heart .fill { position: absolute; inset: 0; background: url('assets/dataart-mark.jpeg') center/cover no-repeat;
+    -webkit-clip-path: path('M31 53C31 53 4 37.7 4 19.3C4 10.2 10.7 4 18.9 4C24.5 4 28.6 7.7 31 12.2C33.4 7.7 37.5 4 43.1 4C51.3 4 58 10.2 58 19.3C58 37.7 31 53 31 53Z');
+    clip-path: path('M31 53C31 53 4 37.7 4 19.3C4 10.2 10.7 4 18.9 4C24.5 4 28.6 7.7 31 12.2C33.4 7.7 37.5 4 43.1 4C51.3 4 58 10.2 58 19.3C58 37.7 31 53 31 53Z'); }
+  .intro-heart svg { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.45)); }
+  .intro-kicker { color: var(--gold); font-size: 0.72rem; letter-spacing: 0.34em; text-transform: uppercase; font-weight: 700; margin-top: 6px; }
+  .intro-title { font-family: var(--display); font-size: clamp(2rem, 7vw, 2.9rem); line-height: 1.02; margin: 8px 0 6px; color: #fff; }
+  .intro-sub { color: var(--text-dim); font-size: 0.95rem; line-height: 1.5; max-width: 400px; margin: 0 auto 24px; }
+  .intro-ways { display: flex; flex-direction: column; gap: 10px; text-align: left; margin-bottom: 22px; }
+  .intro-way { display: flex; gap: 14px; align-items: flex-start; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 15px 17px; }
+  .intro-way .ico { flex-shrink: 0; width: 40px; height: 40px; border-radius: 11px; display: flex; align-items: center;
+    justify-content: center; font-size: 1.2rem; background: rgba(255,47,176,0.14); border: 1px solid rgba(255,47,176,0.32); }
+  .intro-way.listen .ico { background: rgba(125,231,224,0.12); border-color: rgba(125,231,224,0.32); }
+  .intro-way h4 { font-size: 0.98rem; font-weight: 700; margin-bottom: 3px; }
+  .intro-way p { font-size: 0.86rem; color: var(--text-dim); line-height: 1.45; }
+  .intro-go { width: 100%; padding: 15px; border-radius: 999px; border: none; font-family: var(--font);
+    font-size: 1rem; font-weight: 700; letter-spacing: 0.03em; cursor: pointer; color: #0b0b0f;
+    background: linear-gradient(90deg, var(--cyan), var(--pink)); transition: filter .15s ease; }
+  .intro-go:hover { filter: brightness(1.08); }
+  .intro-fine { font-size: 0.76rem; color: var(--text-dim); margin-top: 14px; letter-spacing: 0.02em; }
 </style>
 </head>
 <body>
@@ -265,6 +327,35 @@
       </div>
       <div class="kicker">Song Contest</div>
       <div class="sub">Media &amp; Entertainment Edition &middot; 2026</div>
+      <button class="howto-btn" onclick="openIntro()"><span class="q">?</span> How it works</button>
+    </div>
+  </div>
+
+  <div class="intro-overlay" id="intro-overlay">
+    <div class="intro-card">
+      <button class="intro-close" onclick="closeIntro()" title="Close">✕</button>
+      <div class="intro-heart"><span class="fill"></span><svg viewBox="0 0 62 58"><path d="M31 53C31 53 4 37.7 4 19.3C4 10.2 10.7 4 18.9 4C24.5 4 28.6 7.7 31 12.2C33.4 7.7 37.5 4 43.1 4C51.3 4 58 10.2 58 19.3C58 37.7 31 53 31 53Z" fill="none" stroke="#fff" stroke-width="4"/></svg></div>
+      <div class="intro-kicker">Welcome to</div>
+      <div class="intro-title">DataArtVision 2026</div>
+      <div class="intro-sub">The Media &amp; Entertainment song contest. Press play on the entries, then give your points to your favourites — or step up and enter a track of your own.</div>
+      <div class="intro-ways">
+        <div class="intro-way">
+          <div class="ico">🎤</div>
+          <div>
+            <h4>Enter your own song</h4>
+            <p>Upload as many tracks as you like, each under its own band name. Who's really behind them stays secret until the results are in.</p>
+          </div>
+        </div>
+        <div class="intro-way listen">
+          <div class="ico">🗳️</div>
+          <div>
+            <h4>Listen &amp; vote</h4>
+            <p>Play through the entries and hand out your points, Eurovision-style — 12 to your favourite, on down the list.</p>
+          </div>
+        </div>
+      </div>
+      <button class="intro-go" onclick="closeIntro()">Let's go 🎶</button>
+      <div class="intro-fine">Enter as many tracks as you like &middot; one ballot per person &middot; votes are counted, never named.</div>
     </div>
   </div>
 
@@ -282,7 +373,7 @@
   <div id="panel-home"></div>
   <div id="panel-submit" class="hidden"></div>
 
-  <footer>One track and one ballot per person &middot; votes are counted, never named</footer>
+  <footer>Enter as many tracks as you like &middot; one ballot per person &middot; votes are counted, never named</footer>
 </div>
 
 <audio id="player"></audio>
@@ -335,6 +426,7 @@ const norm = s => String(s || "").trim().toLowerCase();
    ============================================================ */
 async function boot() {
   document.getElementById("nb-eq").innerHTML = eqBarsHtml(30);
+  if (!localStorage.getItem("tc_seen_intro")) openIntro();
   if (SUPABASE_URL.startsWith("PASTE") || SUPABASE_ANON_KEY.startsWith("PASTE")) {
     document.getElementById("config-error").classList.remove("hidden");
     return;
@@ -489,7 +581,8 @@ function renderHome() {
     top = `<div class="banner info">The contest hasn't started voting yet — but the jukebox is open.</div>`;
   }
 
-  el.innerHTML = top + rows.map((t, i) => trackRowHtml(t, i, { pointsVisible, votingMode })).join("");
+  const maxPoints = Math.max(1, ...rows.map(r => r.points || 0));
+  el.innerHTML = top + rows.map((t, i) => trackRowHtml(t, i, { pointsVisible, votingMode, maxPoints })).join("");
 }
 
 /* Winner spotlight shown when voting has closed */
@@ -554,7 +647,7 @@ function ballotHtml(eligible) {
     </div>`;
 }
 
-function trackRowHtml(t, i, { pointsVisible, votingMode }) {
+function trackRowHtml(t, i, { pointsVisible, votingMode, maxPoints }) {
   const ranked = state.ranking.includes(t.id);
   const isMine = state.me && norm(t.real_name) === norm(state.me);
   const rank = t.rank || (i + 1);
@@ -590,6 +683,7 @@ function trackRowHtml(t, i, { pointsVisible, votingMode }) {
         <div class="title">${esc(t.title)}</div>
         <div class="artist">${esc(t.band_name)}</div>
         <div class="streams">▶ ${t.plays || 0} stream${t.plays === 1 ? "" : "s"}</div>
+        ${pointsVisible ? `<div class="pbar"><i style="width:${((t.points / (maxPoints || 1)) * 100).toFixed(1)}%"></i></div>` : ""}
       </div>
       <div class="track-actions">
         ${state.playingId === t.id ? `<span class="eq mini playing">${eqBarsHtml(4)}</span>` : ""}
@@ -634,24 +728,28 @@ async function castBallot() {
    ============================================================ */
 function renderSubmit() {
   const el = document.getElementById("panel-submit");
-  const mine = state.me ? state.tracks.find(t => norm(t.real_name) === norm(state.me)) : null;
+  const mine = state.me ? state.tracks.filter(t => norm(t.real_name) === norm(state.me)) : [];
 
   if (!state.settings.submissions_open) {
     el.innerHTML = `<div class="banner warn">Entries are closed. ${state.tracks.length} track${state.tracks.length === 1 ? "" : "s"} made the contest.</div>`;
     return;
   }
   if (!state.me) {
-    el.innerHTML = `<div class="banner info">Type your name to enter a track. Your real name is <b>never shown</b> — it just stops duplicate entries. Your band name is what the world sees.</div>` + whoamiHtml("submit");
+    el.innerHTML = `<div class="banner info">Type your name to enter a track. Your real name is <b>never shown</b> — it just keeps all your entries grouped privately. Your band name is what the world sees.</div>` + whoamiHtml("submit");
     return;
   }
-  if (mine) {
-    el.innerHTML = whoamiHtml("submit") +
-      `<div class="banner ok">Your entry <b>${esc(mine.title)}</b> by <b>${esc(mine.band_name)}</b> is in. Your secret is safe. 🤫</div>`;
-    return;
+
+  let mineHtml = "";
+  if (mine.length) {
+    mineHtml = `<div class="myentries">
+      <div class="myentries-head">Your ${mine.length === 1 ? "entry" : mine.length + " entries"} so far <span>🤫 secret</span></div>
+      ${mine.map(t => `<div class="myentry">${coverHtml(t)}<div class="myentry-meta"><div class="title">${esc(t.title)}</div><div class="artist">${esc(t.band_name)}</div></div></div>`).join("")}
+    </div>`;
   }
-  el.innerHTML = whoamiHtml("submit") + `
+
+  el.innerHTML = whoamiHtml("submit") + mineHtml + `
     <div class="card">
-      <h2>Submit your track</h2>
+      <h2>${mine.length ? "Enter another track" : "Submit your track"}</h2>
       <div class="field">
         <label for="f-band">Band / artist name (this is all anyone will see)</label>
         <input type="text" id="f-band" maxlength="60" placeholder="e.g. The Prompt Engineers">
@@ -668,8 +766,8 @@ function renderSubmit() {
         <label for="f-cover">Cover art — optional (JPG/PNG, max ${MAX_IMAGE_MB}MB)</label>
         <input type="file" id="f-cover" accept="image/*">
       </div>
-      <button class="btn" id="f-go" onclick="submitTrack()">Submit entry</button>
-      <p class="note">One entry per person. Your real name (<b>${esc(state.me)}</b>) is stored privately and never displayed — the unmasking happens after the results. No edits after upload; ask the organiser to reset it if you need to swap.</p>
+      <button class="btn" id="f-go" onclick="submitTrack()">${mine.length ? "Add this track" : "Submit entry"}</button>
+      <p class="note">Enter as many tracks as you like — each one appears under its own band name. Your real name (<b>${esc(state.me)}</b>) is stored privately and never displayed; the unmasking happens after the results. No edits after upload; ask the organiser to remove one if you need to swap.</p>
       <div id="f-msg"></div>
     </div>`;
 }
@@ -710,12 +808,13 @@ async function submitTrack() {
       id, real_name: state.me.trim(), band_name: band, title, audio_path: audioPath, cover_path: coverPath,
     });
     if (ins.error) {
-      if (ins.error.code === "23505") throw new Error("A track has already been entered under your name.");
+      if (ins.error.code === "23505") throw new Error("The database is still set to one entry per person. Drop the unique constraint on submissions.real_name in Supabase to allow multiple tracks (see the note the organiser was given).");
       throw ins.error;
     }
     await refreshAll();
-    state.tab = "home";
     renderAll();
+    document.getElementById("panel-submit").insertAdjacentHTML("afterbegin",
+      `<div class="banner ok">🎉 <b>${esc(title)}</b> by <b>${esc(band)}</b> is in! Enter another below, or head to <b>Vote Now</b> to hear it on the chart.</div>`);
   } catch (e) {
     btn.disabled = false;
     btn.textContent = "Submit entry";
@@ -876,6 +975,21 @@ function logPlay(id) {
   if (t) t.plays = (t.plays || 0) + 1;           // optimistic local bump
   Promise.resolve(db.rpc("log_play", { track: id })).catch(() => {});
 }
+
+/* ---- Intro / welcome overlay ---- */
+function openIntro() {
+  document.getElementById("intro-overlay").classList.add("show");
+}
+function closeIntro() {
+  document.getElementById("intro-overlay").classList.remove("show");
+  localStorage.setItem("tc_seen_intro", "1");
+}
+document.getElementById("intro-overlay").addEventListener("click", e => {
+  if (e.target.id === "intro-overlay") closeIntro();
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeIntro();
+});
 
 function esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

@@ -5,9 +5,10 @@
 --  see README step 3 — and run the storage policies at the bottom.)
 -- ============================================================
 
--- One track per person. real_name is PRIVATE (never shown in the app);
--- band_name is what everyone sees. Peek at this table after voting
--- closes to find out who's who.
+-- People may enter MULTIPLE tracks, each under its own band_name.
+-- real_name is PRIVATE (never shown in the app) — it groups a person's
+-- entries and hides their own tracks from their ballot. Peek at this
+-- table after voting closes to find out who's who.
 create table submissions (
   id uuid primary key default gen_random_uuid(),
   real_name text not null,
@@ -18,7 +19,7 @@ create table submissions (
   plays int not null default 0,
   created_at timestamptz default now()
 );
-create unique index one_entry_per_person on submissions (lower(real_name));
+-- (No unique index on real_name — multiple entries per person are allowed.)
 
 -- One ballot per name (case-insensitive: "dave" can't also vote as "Dave").
 -- voter_name is your private review trail — the app never displays it.
