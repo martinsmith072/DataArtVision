@@ -878,6 +878,23 @@ document.getElementById("nb-seek").addEventListener("click", e => {
   player.currentTime = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * player.duration;
 });
 
+/* ---- Stream counting (Spotify-style): a play counts after 30s of ACTUAL listening ---- */
+const PLAY_THRESHOLD = 30;                 // seconds of real playback before it counts
+let sessionListened = 0, sessionCounted = false, lastPlayT = 0;
+function resetPlaySession() { sessionListened = 0; sessionCounted = false; lastPlayT = 0; }
+player.addEventListener("timeupdate", () => {
+  const cur = player.currentTime, dt = cur - lastPlayT;
+  lastPlayT = cur;
+  if (dt > 0 && dt < 1.5) sessionListened += dt;   // add only real elapsed play — ignore seeks/pauses
+  // Short tracks (< 30s) count when listened almost to the end.
+  const threshold = Math.min(PLAY_THRESHOLD, (player.duration || PLAY_THRESHOLD) - 0.25);
+  if (!sessionCounted && state.current && sessionListened >= threshold) {
+    sessionCounted = true;
+    logPlay(state.current);
+    renderAll();                                    // reflect the new count / flame live
+  }
+});
+
 /* ============================================================
    AUDIO-REACTIVE VISUALISER
    Real frequency data via Web Audio when the file allows it
@@ -958,12 +975,12 @@ function togglePlay(id) {
       player.src = t.audioUrl;
       player.currentTime = 0;
       state.current = id;
+      resetPlaySession();                 // begin counting a fresh listen (counts at 30s)
       player.play().catch(() => {});
-      logPlay(id);
     } else {                              // same track
       if (player.ended || player.currentTime >= (player.duration || 1e9) - 0.3) {
         player.currentTime = 0;           // finished — replay from the top…
-        logPlay(id);                      // …and count it as another listen
+        resetPlaySession();               // …as a new listen to be counted
       }
       state.current = id;
       player.play().catch(() => {});
