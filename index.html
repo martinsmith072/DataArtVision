@@ -957,7 +957,11 @@ function togglePlay(id) {
       state.current = id;
       player.play().catch(() => {});
       logPlay(id);
-    } else {                              // same track — resume from position
+    } else {                              // same track
+      if (player.ended || player.currentTime >= (player.duration || 1e9) - 0.3) {
+        player.currentTime = 0;           // finished — replay from the top…
+        logPlay(id);                      // …and count it as another listen
+      }
       state.current = id;
       player.play().catch(() => {});
     }
@@ -1004,11 +1008,8 @@ function renderNowPlaying() {
   document.getElementById("nb-heart").classList.toggle("playing", playing);
 }
 
-/* Stream counter: one per track per browser, so replays don't inflate numbers */
+/* Stream counter: every play counts, so repeat listens show how popular a song is. */
 function logPlay(id) {
-  const key = "tc_played_" + id;
-  if (localStorage.getItem(key)) return;
-  localStorage.setItem(key, "1");
   const t = state.tracks.find(x => x.id === id);
   if (t) t.plays = (t.plays || 0) + 1;           // optimistic local bump
   Promise.resolve(db.rpc("log_play", { track: id })).catch(() => {});
