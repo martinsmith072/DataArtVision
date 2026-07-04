@@ -251,7 +251,12 @@
   .nowbar-meta { width: 150px; flex-shrink: 0; min-width: 0; }
   .nb-title { font-weight: 700; font-size: 0.96rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .nb-artist { color: var(--text-dim); font-size: 0.82rem; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .nowbar .eq { flex: 1; height: 36px; justify-content: center; }
+  .nowbar .eq { flex: none; height: 22px; justify-content: center; }
+  .nb-center { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; justify-content: center; }
+  .nb-progress { display: flex; align-items: center; gap: 9px; }
+  .nb-time { font-size: 0.7rem; color: var(--text-dim); font-variant-numeric: tabular-nums; min-width: 32px; text-align: center; flex-shrink: 0; }
+  .nb-seek { flex: 1; height: 5px; background: rgba(255,255,255,0.16); border-radius: 999px; cursor: pointer; }
+  .nb-seek-fill { height: 100%; width: 0%; background: var(--pink); border-radius: 999px; pointer-events: none; }
   .nb-heart { width: 34px; height: 34px; flex-shrink: 0; position: relative; transform-origin: center; }
   .nb-heart.playing { animation: beat 0.85s ease-in-out infinite; }
   .nb-heart .fill { position: absolute; inset: 0; background: url('assets/dataart-mark.jpeg') center/cover no-repeat;
@@ -385,7 +390,14 @@
       <div class="nb-title" id="nb-title"></div>
       <div class="nb-artist" id="nb-artist"></div>
     </div>
-    <div class="eq" id="nb-eq"></div>
+    <div class="nb-center">
+      <div class="eq" id="nb-eq"></div>
+      <div class="nb-progress">
+        <span class="nb-time" id="nb-cur">0:00</span>
+        <div class="nb-seek" id="nb-seek"><div class="nb-seek-fill" id="nb-fill"></div></div>
+        <span class="nb-time" id="nb-dur">0:00</span>
+      </div>
+    </div>
     <div class="nb-heart" id="nb-heart"><span class="fill"></span><svg viewBox="0 0 34 32"><path d="M17 30.6C17 30.6 2 21.7 2 11.2C2 5.9 6.2 2 11 2C14.3 2 16.2 4.1 17 6.4C17.8 4.1 19.7 2 23 2C27.8 2 32 5.9 32 11.2C32 21.7 17 30.6 17 30.6Z" fill="none" stroke="#fff" stroke-width="2.4"/></svg></div>
     <button class="nb-play" id="nb-play" onclick="togglePlay(state.current)">▶</button>
     <button class="nb-close" id="nb-close" onclick="stopAudio()" title="Close">✕</button>
@@ -836,6 +848,27 @@ function coverHtml(t) {
 const player = document.getElementById("player");
 player.crossOrigin = "anonymous";   // needed for the audio-reactive visualiser
 player.onended = () => { state.playingId = null; renderAll(); };
+
+/* ---- Now-playing progress: elapsed / duration + seek bar ---- */
+function fmtTime(s) {
+  if (!isFinite(s) || s < 0) s = 0;
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+  return m + ":" + String(sec).padStart(2, "0");
+}
+function updateProgress() {
+  const cur = document.getElementById("nb-cur"), dur = document.getElementById("nb-dur"), fill = document.getElementById("nb-fill");
+  if (!cur) return;
+  cur.textContent = fmtTime(player.currentTime);
+  dur.textContent = fmtTime(player.duration);
+  fill.style.width = (player.duration ? (player.currentTime / player.duration) * 100 : 0).toFixed(2) + "%";
+}
+player.addEventListener("timeupdate", updateProgress);
+player.addEventListener("loadedmetadata", updateProgress);
+document.getElementById("nb-seek").addEventListener("click", e => {
+  if (!player.duration) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  player.currentTime = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * player.duration;
+});
 
 /* ============================================================
    AUDIO-REACTIVE VISUALISER
