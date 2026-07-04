@@ -145,6 +145,8 @@
   .track-meta .title { font-weight: 600; font-size: 1.02rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .track-meta .artist { color: var(--text-dim); font-size: 0.85rem; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .track-meta .streams { color: var(--text-dim); font-size: 0.75rem; margin-top: 3px; }
+  .streams .flame { display: inline-block; margin-left: 4px; animation: flamepulse 1.4s ease-in-out infinite; }
+  @keyframes flamepulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.18); } }
   .track-actions { display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
   .mini-btn { padding: 9px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: var(--font); transition: all .15s ease; }
   .mini-btn:hover:not(:disabled) { border-color: rgba(255,255,255,0.25); }
@@ -599,7 +601,8 @@ function renderHome() {
   }
 
   const maxPoints = Math.max(1, ...rows.map(r => r.points || 0));
-  el.innerHTML = top + rows.map((t, i) => trackRowHtml(t, i, { pointsVisible, votingMode, maxPoints })).join("");
+  const maxPlays = Math.max(0, ...rows.map(r => r.plays || 0));
+  el.innerHTML = top + rows.map((t, i) => trackRowHtml(t, i, { pointsVisible, votingMode, maxPoints, maxPlays })).join("");
 }
 
 /* Winner spotlight shown when voting has closed */
@@ -664,7 +667,7 @@ function ballotHtml(eligible) {
     </div>`;
 }
 
-function trackRowHtml(t, i, { pointsVisible, votingMode, maxPoints }) {
+function trackRowHtml(t, i, { pointsVisible, votingMode, maxPoints, maxPlays }) {
   const ranked = state.ranking.includes(t.id);
   const isMine = state.me && norm(t.real_name) === norm(state.me);
   const rank = t.rank || (i + 1);
@@ -699,7 +702,7 @@ function trackRowHtml(t, i, { pointsVisible, votingMode, maxPoints }) {
       <div class="track-meta">
         <div class="title">${esc(t.title)}</div>
         <div class="artist">${esc(t.band_name)}</div>
-        <div class="streams">▶ ${t.plays || 0} stream${t.plays === 1 ? "" : "s"}</div>
+        <div class="streams">▶ ${t.plays || 0} stream${t.plays === 1 ? "" : "s"}${(t.plays > 0 && t.plays === maxPlays) ? ` <span class="flame" title="Most played">🔥</span>` : ""}</div>
         ${pointsVisible ? `<div class="pbar"><i style="width:${((t.points / (maxPoints || 1)) * 100).toFixed(1)}%"></i></div>` : ""}
       </div>
       <div class="track-actions">
