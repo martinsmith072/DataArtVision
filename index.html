@@ -540,6 +540,11 @@ function renderHome() {
   const el = document.getElementById("panel-home");
   const n = state.tracks.length;
 
+  // Tab label reflects the phase, so "Vote Now" never shows when you can't vote.
+  const votingOpenTab = state.settings.voting_open;
+  const revealedTab = !votingOpenTab && state.ballots.length > 0;
+  document.getElementById("tab-home").textContent = revealedTab ? "Results" : (votingOpenTab ? "Vote Now" : "Listen");
+
   if (!n) {
     el.innerHTML = `<div class="banner info">No entries yet — hit <b>Submit a Track</b> and be the first on stage.</div>`;
     return;
@@ -588,9 +593,9 @@ function renderHome() {
   } else if (votingOpen) {
     top = whoamiHtml("home") + `<div class="banner warn">Not enough tracks to vote on yet.</div>`;
   } else if (state.settings.submissions_open) {
-    top = `<div class="banner info">Entries are open. Listen to what's in so far — then hit <b>Submit a Track</b> when yours is ready. Voting comes later.</div>`;
+    top = `<div class="banner warn">🗳️ <b>Voting opens soon.</b> For now, press play to hear the entries — and hit <b>Submit a Track</b> to add your own. You'll be able to give out your points once voting opens.</div>`;
   } else {
-    top = `<div class="banner info">The contest hasn't started voting yet — but the jukebox is open.</div>`;
+    top = `<div class="banner warn">🗳️ <b>Voting opens soon.</b> Have a listen to the entries — the chart and voting will open shortly.</div>`;
   }
 
   const maxPoints = Math.max(1, ...rows.map(r => r.points || 0));
