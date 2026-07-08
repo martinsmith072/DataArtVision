@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DataArtVision — Song Contest 2026</title>
+<link rel="icon" type="image/jpeg" href="assets/dataart-mark.jpeg">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -321,6 +322,9 @@
     background: linear-gradient(90deg, var(--cyan), var(--pink)); transition: filter .15s ease; }
   .intro-go:hover { filter: brightness(1.08); }
   .intro-fine { font-size: 0.76rem; color: var(--text-dim); margin-top: 14px; letter-spacing: 0.02em; }
+  .intro-about { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--border); text-align: left; }
+  .intro-about h4 { font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--cyan); margin-bottom: 9px; }
+  .intro-about p { font-size: 0.86rem; color: var(--text-dim); line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -360,6 +364,10 @@
             <p>Play through the entries and hand out your points, Eurovision-style — 12 to your favourite, on down the list.</p>
           </div>
         </div>
+      </div>
+      <div class="intro-about">
+        <h4>Why we're doing this</h4>
+        <p>Beyond the fun, this is a hands-on way to explore, discover and learn how AI-generated music is made — because it's a real challenge facing the music industry right now. AI can produce tracks at a speed and quality that's reshaping the landscape for recording artists, and the industry is actively working out how to identify and flag AI-generated content, and how to ensure any reproduction of a real artist's voice or style is properly credited. The best way to understand where this is heading is to try making a track yourself.</p>
       </div>
       <button class="intro-go" onclick="closeIntro()">Let's go 🎶</button>
       <div class="intro-fine">Enter as many tracks as you like &middot; one ballot per person &middot; votes are counted, never named.</div>
